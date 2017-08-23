@@ -78,8 +78,8 @@ namespace BaiduYunBakTool
         //    public static extern ILockBytes CreateILockBytesOnHGlobal(IntPtr hGlobal, bool fDeleteOnRelease);
 
 
-        [DllImport("ole32.dll", PreserveSig = false)]
-        public static extern IntPtr StgCreateDocfileOnILockBytes(IntPtr iLockBytes, STGM grfMode, int reserved);
+        //[DllImport("ole32.dll", PreserveSig = false)]
+        //public static extern IntPtr StgCreateDocfileOnILockBytes(IntPtr iLockBytes, STGM grfMode, int reserved);
         //    public static extern IStorage StgCreateDocfileOnILockBytes(ILockBytes iLockBytes, STGM grfMode, int reserved);
 
 
