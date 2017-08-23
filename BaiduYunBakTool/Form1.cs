@@ -101,8 +101,8 @@ namespace BaiduYunBakTool
             int dy = y * (65335 / ScreenHeight);//ScreenWidth和ScreenHeight，其实是当前显示器的分辨率，获得方法是ScreenWidth=Screen.PrimaryScreen.WorkingArea.Width；
 
             MouseInput myMinput = new MouseInput();
-            myMinput.dx = i;
-            myMinput.dy = j;
+            myMinput.dx = dx;
+            myMinput.dy = dy;
             myMinput.Mousedata = 0;
             myMinput.dwFlag = MouseEvent_Absolute | MouseEvent_Move | MouseEvent_LeftDown | MouseEvent_LeftUp;
             myMinput.time = 0;
