@@ -51,6 +51,7 @@
             // 
             // timer1
             // 
+            this.timer1.Enabled = true;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // contextMenuStrip1
@@ -64,24 +65,24 @@
             // 打开主窗体ToolStripMenuItem
             // 
             this.打开主窗体ToolStripMenuItem.Name = "打开主窗体ToolStripMenuItem";
-            this.打开主窗体ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.打开主窗体ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.打开主窗体ToolStripMenuItem.Text = "打开主窗体";
             this.打开主窗体ToolStripMenuItem.Click += new System.EventHandler(this.打开主窗体ToolStripMenuItem_Click);
             // 
             // 退出程序ToolStripMenuItem
             // 
             this.退出程序ToolStripMenuItem.Name = "退出程序ToolStripMenuItem";
-            this.退出程序ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.退出程序ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.退出程序ToolStripMenuItem.Text = "退出程序";
             this.退出程序ToolStripMenuItem.Click += new System.EventHandler(this.退出程序ToolStripMenuItem_Click);
             // 
             // notifyIcon1
             // 
-            this.notifyIcon1.BalloonTipText = "PACS图像转存服务，不可退出！";
+            this.notifyIcon1.BalloonTipText = "知识库备份服务，不可退出！";
             this.notifyIcon1.BalloonTipTitle = "提示";
             this.notifyIcon1.ContextMenuStrip = this.contextMenuStrip1;
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
-            this.notifyIcon1.Text = "PACS图像转存服务，不可退出！";
+            this.notifyIcon1.Text = "知识库备份服务，不可退出！";
             this.notifyIcon1.Visible = true;
             // 
             // Form1

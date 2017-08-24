@@ -28,6 +28,8 @@ namespace BaiduYunBakTool
             public IntPtr pszText;
             public int cchText;
         }
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr SetActiveWindow(IntPtr hWnd);
         [DllImport("USER32.DLL", EntryPoint = "PostMessage")]
         public static extern bool PostMessage(IntPtr hwnd, uint msg,
                 IntPtr wParam, IntPtr lParam);
@@ -62,13 +64,38 @@ namespace BaiduYunBakTool
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, ref TBBUTTONINFO buttonInfo);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern int RegisterWindowMessage(string msg);
-
+        /// <summary>
+        /// 设置目标窗体大小，位置
+        /// </summary>
+        /// <param name="hWnd">目标句柄</param>
+        /// <param name="x">目标窗体新位置X轴坐标</param>
+        /// <param name="y">目标窗体新位置Y轴坐标</param>
+        /// <param name="nWidth">目标窗体新宽度</param>
+        /// <param name="nHeight">目标窗体新高度</param>
+        /// <param name="BRePaint">是否刷新窗体</param>
+        /// <returns></returns>
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int MoveWindow(IntPtr hWnd, int x, int y, int nWidth, int nHeight, bool BRePaint);
         [DllImport("gdi32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool BitBlt(IntPtr hDC, int x, int y, int nWidth, int nHeight, IntPtr hSrcDC, int xSrc, int ySrc, int dwRop);
-
+        //该函数获得一个指定子窗口的父窗口句柄
+        [DllImport("user32.dll")]
+        public static extern int GetParent(IntPtr hwnd);
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetFocus(IntPtr hWnd);
+        //该函数获得给定窗口的可视状态。
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(IntPtr hwnd);
+        public delegate bool CallBack(IntPtr hwnd, int y);
+        //该函数枚举所有屏幕上的顶层窗口，并将窗口句柄传送给应用程序定义的回调函数。
+        //回调函数返回FALSE将停止枚举，否则EnumWindows函数继续到所有顶层窗口枚举完为止。
+        [DllImport("user32.dll")]
+        public static extern int EnumWindows(CallBack x, int y);    
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr DefWindowProc(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
@@ -82,8 +109,69 @@ namespace BaiduYunBakTool
         //public static extern IntPtr StgCreateDocfileOnILockBytes(IntPtr iLockBytes, STGM grfMode, int reserved);
         //    public static extern IStorage StgCreateDocfileOnILockBytes(ILockBytes iLockBytes, STGM grfMode, int reserved);
 
+        public const int PROCESS_ALL_ACCESS = 2035711;
 
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+        [Flags]
+        public enum AllocationType
+        {
+            Commit = 0x1000,
+            Reserve = 0x2000,
+            Decommit = 0x4000,
+            Release = 0x8000,
+            Reset = 0x80000,
+            Physical = 0x400000,
+            TopDown = 0x100000,
+            WriteWatch = 0x200000,
+            LargePages = 0x20000000
+        }
 
+        [Flags]
+        public enum MemoryProtection
+        {
+            Execute = 0x10,
+            ExecuteRead = 0x20,
+            ExecuteReadWrite = 0x40,
+            ExecuteWriteCopy = 0x80,
+            NoAccess = 0x01,
+            ReadOnly = 0x02,
+            ReadWrite = 0x04,
+            WriteCopy = 0x08,
+            GuardModifierflag = 0x100,
+            NoCacheModifierflag = 0x200,
+            WriteCombineModifierflag = 0x400
+        }
+        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        public static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress,uint dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
+        [DllImport("kernel32.dll ")]
+        public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, out byte[] lpBuffer, int nSize, out int lpNumberOfBytesRead);
+        [Flags]
+        public enum FreeType
+        {
+            Decommit = 0x4000,
+            Release = 0x8000,
+        }
+        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress,int dwSize, FreeType dwFreeType);
+        [DllImport("kernel32.dll ")]
+        public static extern bool CloseHandle(IntPtr hProcess);
+        [DllImport("kernel32.dll")]
+        public static extern bool WriteProcessMemory(
+                   IntPtr hProcess,
+                   IntPtr lpBaseAddress,
+                   IntPtr lpBuffer,
+                   int nSize,
+                   out int lpNumberOfBytesWritten
+               );
+        [DllImport("kernel32.dll ")]
+        static extern bool ReadProcessMemory(int hProcess, int lpBaseAddress, out int lpBuffer, int nSize, out int lpNumberOfBytesRead);
+        //二维数组
+        [DllImport("kernel32.dll ")]
+        static extern bool ReadProcessMemory(int hProcess, int lpBaseAddress, byte[,] lpBuffer, int nSize, out int lpNumberOfBytesRead);
+        //一维数组
+        [DllImport("kernel32.dll ")]
+        static extern bool ReadProcessMemory(int hProcess, int lpBaseAddress, byte[] lpBuffer, int nSize, out int lpNumberOfBytesRead);
         [DllImport("User32.dll", CharSet = CharSet.Auto)]
         public static extern int SendMessage(IntPtr hWnd, int message, IntPtr wParam, IntPtr lParam);
 
@@ -100,6 +188,14 @@ namespace BaiduYunBakTool
             public Int32 time;
             public IntPtr dwExtraInfo;
         }
+        public struct DROPFILES
+        {
+            public int pFiles;
+            public int x;
+            public int y;
+            public int fNC;
+            public int fWide;
+        };
         [StructLayout(LayoutKind.Sequential)]
         public struct tagKEYBDINPUT
         {
@@ -1337,6 +1433,7 @@ namespace BaiduYunBakTool
         public const int TB_ENABLEBUTTON = 0x401;
         public const int TB_ENDTRACK = 8;
         public const int TB_GETBUTTON = 0x417;
+        public const int TB_BUTTONCOUNT = (WM_USER + 24);
         public static readonly int TB_GETBUTTONINFO;
         public const int TB_GETBUTTONINFOA = 0x441;
         public const int TB_GETBUTTONINFOW = 0x43f;
