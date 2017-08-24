@@ -273,7 +273,7 @@ namespace BaiduYunBakTool
         }
         private void GenFinalRar()
         {
-            string bakfile = Path.Combine(ConfigurationManager.AppSettings["BakPath"].ToString(), DateTime.Now.ToString("yyyyMMddss") + ".rar");
+            string bakfile = Path.Combine(ConfigurationManager.AppSettings["BakPath"].ToString(), DateTime.Now.ToString("yyyyMMdd") + ".rar");
             ProcessStartInfo info = new ProcessStartInfo();
             info.FileName = Path.Combine(WinRarPath, "Rar.exe");
             info.WindowStyle = ProcessWindowStyle.Hidden;
