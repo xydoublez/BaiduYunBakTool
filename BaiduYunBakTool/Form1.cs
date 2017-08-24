@@ -79,16 +79,16 @@ namespace BaiduYunBakTool
                 List<FileInfo> deleteFiles = new List<FileInfo>();
                 foreach (var f in fileInfoList)
                 {
-                    if (f is DirectoryInfo)
+                    if (DateTime.Compare(f.CreationTime.Date, DateTime.Now.Date) < 0)
                     {
-                        if (DateTime.Compare(f.CreationTime, DateTime.Now.AddDays(-1)) < 0)
+                        if (f is DirectoryInfo)
                         {
                             deleteDirs.Add(f as DirectoryInfo);
                         }
-                    }
-                    else if (f is FileInfo)
-                    {
-                        deleteFiles.Add(f as FileInfo);
+                        else if(f is FileInfo)
+                        {
+                            deleteFiles.Add(f as FileInfo);
+                        }
                     }
                 }
                 foreach (var f in deleteFiles)
