@@ -59,13 +59,51 @@ namespace BaiduYunBakTool
                 GenIISBak();
                 GenFinalRar();
                 autoBaidu2();
+                DeleteBeforeFiles();
                 Log("备份成功", BakPath);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log("备份失败", ex.Message + ex.StackTrace);
             }
 
+        }
+        private void DeleteBeforeFiles()
+        {
+            try
+            {
+                var path = ConfigurationManager.AppSettings["BakPath"].ToString();
+                DirectoryInfo dir = new DirectoryInfo(path);
+                FileSystemInfo[] fileInfoList = dir.GetFileSystemInfos("*.*", SearchOption.AllDirectories);
+                List<DirectoryInfo> deleteDirs = new List<DirectoryInfo>();
+                List<FileInfo> deleteFiles = new List<FileInfo>();
+                foreach (var f in fileInfoList)
+                {
+                    if (f is DirectoryInfo)
+                    {
+                        if (DateTime.Compare(f.CreationTime, DateTime.Now.AddDays(-1)) < 0)
+                        {
+                            deleteDirs.Add(f as DirectoryInfo);
+                        }
+                    }
+                    else if (f is FileInfo)
+                    {
+                        deleteFiles.Add(f as FileInfo);
+                    }
+                }
+                foreach (var f in deleteFiles)
+                {
+                    f.Delete();
+                }
+                foreach (var f in deleteDirs)
+                {
+                    f.Delete();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("删除旧文件失败", ex.Message + ex.StackTrace);
+            }
         }
         /// <summary>
         /// 此方法成功过
@@ -82,7 +120,7 @@ namespace BaiduYunBakTool
             info.Arguments = "/select,\"" + bakfile + "\"";
             Process p1 = Process.Start(info);
             p1.WaitForExit(1000 * 60 * 10);
-            Thread.Sleep(1000); 
+            Thread.Sleep(1000);
             SendKeys.SendWait("^c");
             Thread.Sleep(100);
             var baidu = win32.FindWindow(null, "欢迎使用百度网盘");
@@ -110,8 +148,8 @@ namespace BaiduYunBakTool
             script += "MouseClick, left, " + dx + "," + dy2 + " \r\n";
             script += " Sleep,100 \r\n";
             script += "send, ^v  \r\n ";
-            
-            
+
+
             File.WriteAllText("auto.ahk", script);
             ProcessStartInfo info1 = new ProcessStartInfo();
             info1.FileName = AutoHotKeyPath;
@@ -119,7 +157,7 @@ namespace BaiduYunBakTool
             info1.Arguments = " auto.ahk ";
             Process p = Process.Start(info1);
             p.WaitForExit(1000 * 60 * 10);
-         
+
 
         }
         /// <summary>
@@ -140,7 +178,7 @@ namespace BaiduYunBakTool
         /// <param name="hWnd"></param>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        private  bool DropFile(IntPtr hWnd, string filePath)
+        private bool DropFile(IntPtr hWnd, string filePath)
         {
             unsafe
             {
@@ -179,7 +217,7 @@ namespace BaiduYunBakTool
                 Marshal.Copy(strbuf, 0, pstrbuf, strbuf.Length);
 
                 //申请远程内存
-                IntPtr ptrRemote = VirtualAllocEx(hproc, IntPtr.Zero, (uint)bufSize,AllocationType.Commit,MemoryProtection.ReadWrite);
+                IntPtr ptrRemote = VirtualAllocEx(hproc, IntPtr.Zero, (uint)bufSize, AllocationType.Commit, MemoryProtection.ReadWrite);
                 if (ptrRemote == IntPtr.Zero)
                     goto clear;
 
@@ -201,7 +239,7 @@ namespace BaiduYunBakTool
                 if (ptrRemote != IntPtr.Zero)
                 {
                     //释放远程内存
-                    if (!VirtualFreeEx(hproc, ptrRemote, 0,FreeType.Release))
+                    if (!VirtualFreeEx(hproc, ptrRemote, 0, FreeType.Release))
                     {
                         throw new Win32Exception();
                     }
@@ -214,10 +252,10 @@ namespace BaiduYunBakTool
         }
         private void autoBaidu()
         {
-            
+
             string bakfile = Path.Combine(ConfigurationManager.AppSettings["BakPath"].ToString(), DateTime.Now.ToString("yyyyMMdd") + ".rar");
 
-            
+
             ProcessStartInfo info = new ProcessStartInfo();
             info.FileName = "Explorer.exe";
             info.WindowStyle = ProcessWindowStyle.Normal;
@@ -291,8 +329,8 @@ namespace BaiduYunBakTool
             var SysPager = win32.FindWindowEx(TrayNotifyWnd, hNext, "SysPager", "");
             var ToolbarWindow32 = win32.FindWindowEx(SysPager, hNext, null, "用户升级的通知区域");
             TBBUTTONINFO info = new TBBUTTONINFO();
-            var count =  API.SendMessage(ToolbarWindow32, API.TB_GETBUTTON, 0, 0);
-            
+            var count = API.SendMessage(ToolbarWindow32, API.TB_GETBUTTON, 0, 0);
+
             Rectangle IconRect = new Rectangle();
             API.SendMessage(ToolbarWindow32, API.TB_GETRECT, info.idCommand, ref IconRect);
             Rectangle barRect = new Rectangle();
@@ -344,10 +382,10 @@ namespace BaiduYunBakTool
             int lpNumberOfByteRead = 0;
             ReadProcessMemory(hProcess, info.lParam, out lpBuffer, Marshal.SizeOf(info), out lpNumberOfByteRead);
             //释放在进程explorer.exe中申请的内存
-            VirtualFreeEx(hProcess, lpButton,Marshal.SizeOf(info),FreeType.Release);
+            VirtualFreeEx(hProcess, lpButton, Marshal.SizeOf(info), FreeType.Release);
             CloseHandle(hProcess);
         }
-        
+
         private void button1_Click(object sender, EventArgs e)
         {
             Bak();
@@ -483,7 +521,7 @@ namespace BaiduYunBakTool
             }
             return true;
         }
-        
+
         private void GetSelectFile()
         {
             EnumWindows(FindCallback, 0);
