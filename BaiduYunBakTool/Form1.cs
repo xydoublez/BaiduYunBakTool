@@ -17,6 +17,7 @@ using static BaiduYunBakTool.win32;
 
 namespace BaiduYunBakTool
 {
+    [ComVisible(true)]
     public partial class Form1 : Form
     {
         string StartTime = ConfigurationManager.AppSettings["StartTime"].ToString();
@@ -58,7 +59,7 @@ namespace BaiduYunBakTool
                 GenMysqlBak();
                 GenIISBak();
                 GenFinalRar();
-                autoBaidu2();
+                UploadBaidu();
                 DeleteBeforeFiles();
                 Log("备份成功", BakPath);
             }
@@ -319,43 +320,10 @@ namespace BaiduYunBakTool
             Process p = Process.Start(info);
             p.WaitForExit(1000 * 60 * 10);
         }
-        private void uploadBaidu()
+        private void UploadBaidu()
         {
-            //查找baidu窗口句柄
-            var Shell_TrayWnd = win32.FindWindow("Shell_TrayWnd", null);
-            IntPtr hNext = IntPtr.Zero;
-            //第一个对话框
-            var TrayNotifyWnd = win32.FindWindowEx(Shell_TrayWnd, hNext, "TrayNotifyWnd", "");
-            var SysPager = win32.FindWindowEx(TrayNotifyWnd, hNext, "SysPager", "");
-            var ToolbarWindow32 = win32.FindWindowEx(SysPager, hNext, null, "用户升级的通知区域");
-            TBBUTTONINFO info = new TBBUTTONINFO();
-            var count = API.SendMessage(ToolbarWindow32, API.TB_GETBUTTON, 0, 0);
-
-            Rectangle IconRect = new Rectangle();
-            API.SendMessage(ToolbarWindow32, API.TB_GETRECT, info.idCommand, ref IconRect);
-            Rectangle barRect = new Rectangle();
-            API.GetWindowRect(ToolbarWindow32, ref barRect);
-            //将像素坐标转化为绝对坐标：
-            //API中MouseInput结构中的dx，dy含义是绝对坐标，是相对屏幕的而言的，屏幕左上角的坐标为（0,0），右下角的坐标为（65535,65535）。而我们在C#中获得的对象（Frame，button，flash等）的坐标都是像素坐标，是跟你当前屏幕的分辨率相关的。假如你的显示器分辨率是1024*768，那么屏幕左上角的像素坐标是（0,0），右下角坐标为（1024,768）。转换函数如下：
-            int ScreenHeight = Screen.PrimaryScreen.WorkingArea.Height;
-            int ScreenWidth = Screen.PrimaryScreen.WorkingArea.Width;
-            int x = barRect.Left + (IconRect.Left / 2);
-            int y = barRect.Top + (IconRect.Top / 2);
-            int dx = x * (65335 / ScreenWidth); //x,y为像素坐标。
-            int dy = y * (65335 / ScreenHeight);//ScreenWidth和ScreenHeight，其实是当前显示器的分辨率，获得方法是ScreenWidth=Screen.PrimaryScreen.WorkingArea.Width；
-
-            MouseInput myMinput = new MouseInput();
-            myMinput.dx = dx;
-            myMinput.dy = dy;
-            myMinput.Mousedata = 0;
-            myMinput.dwFlag = MouseEvent_Absolute | MouseEvent_Move | MouseEvent_LeftDown | MouseEvent_LeftUp;
-            myMinput.time = 0;
-            Input[] myInput = new Input[1];
-            myInput[0] = new Input();
-            myInput[0].type = 0;
-            myInput[0].mi = myMinput;
-            UInt32 result = SendInput((uint)myInput.Length, myInput, Marshal.SizeOf(myInput[0].GetType()));
-
+            string bakfile = Path.Combine(ConfigurationManager.AppSettings["BakPath"].ToString(), DateTime.Now.ToString("yyyyMMdd") + ".rar");
+            var r = this.wb.Document.InvokeScript("lzqUpload", new object[] { bakfile});
         }
         private void openBaidu()
         {
@@ -412,8 +380,60 @@ namespace BaiduYunBakTool
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            this.wb.Navigate("https://pan.baidu.com");
+            //js调用C#用
+            this.wb.ObjectForScripting = this;
             SetAutoRun();
             this.notifyIcon1.ShowBalloonTip(2000, "提示", "备份服务开始运行！", ToolTipIcon.Info);
+        }
+        //添加脚本
+        private void InstallScript(string code, HtmlDocument frameDoc = null)
+        {
+
+            if (null == this.wb.Document || (string.IsNullOrEmpty(code)))
+                return;
+
+            HtmlElement scriptElement = null;
+            HtmlElementCollection elements = null;
+            if (null == scriptElement)
+            {
+                if (frameDoc == null)
+                {
+                    scriptElement = this.wb.Document.CreateElement("script");
+                    elements = this.wb.Document.GetElementsByTagName("head");
+
+                }
+                else
+                {
+                    scriptElement = frameDoc.CreateElement("script");
+                    elements = frameDoc.GetElementsByTagName("head");
+
+                }
+                if (elements.Count > 0)
+                    elements[0].AppendChild(scriptElement);
+
+
+
+
+            }
+
+            //scriptElement.SetAttribute("id", id);
+            scriptElement.SetAttribute("type", "text/javascript");
+            scriptElement.SetAttribute("language", "javascript");
+            scriptElement.SetAttribute("text", code);
+
+
+        }
+        public void UploadBaidu(string filename)
+        {
+            var openFile = win32.FindWindow(null, "选择要加载的文件");
+            win32.SetForegroundWindow(openFile);
+            SendKeys.SendWait(filename);
+            IntPtr hNext = IntPtr.Zero;
+            //第一个对话框
+            var openButton = win32.FindWindowEx(openFile, hNext, "Button", "打开(&O)");
+            win32.SendMessage(openButton, BM_CLICK, IntPtr.Zero, null);
+
         }
         private void SetAutoRun()
         {
@@ -527,5 +547,25 @@ namespace BaiduYunBakTool
             EnumWindows(FindCallback, 0);
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+            UploadBaidu();
+        }
+
+        private void wb_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            System.Diagnostics.Trace.WriteLine("DocumentCompleted：" + e.Url);
+            //文件列表
+            if (e.Url.ToString().IndexOf("https://pan.baidu.com/disk/home#list/path=/&vmode=list") > -1)
+            {
+                InstallJs(this.wb.Document);
+            }
+        }
+        private void InstallJs(HtmlDocument doc)
+        {
+            string script = File.ReadAllText("baidu.js");
+            InstallScript(script, null);
+            
+        }
     }
 }
