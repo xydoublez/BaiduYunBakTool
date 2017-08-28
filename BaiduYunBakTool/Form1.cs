@@ -322,6 +322,7 @@ namespace BaiduYunBakTool
         }
         private void UploadBaidu()
         {
+            Thread.Sleep(3000);
             string bakfile = Path.Combine(ConfigurationManager.AppSettings["BakPath"].ToString(), DateTime.Now.ToString("yyyyMMdd") + ".rar");
             var r = this.wb.Document.InvokeScript("lzqUpload", new object[] { bakfile});
         }
