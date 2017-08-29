@@ -37,7 +37,7 @@ namespace BaiduYunBakTool
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (DateTime.Now.ToString("HH:mm:ss") == ConfigurationManager.AppSettings["StartTime"].ToString() + ":00")
+            if (DateTime.Now.ToString("HH:mm") == ConfigurationManager.AppSettings["StartTime"].ToString())
             {
                 Bak();
             }
@@ -56,11 +56,9 @@ namespace BaiduYunBakTool
                 {
                     Directory.CreateDirectory(BakPath);
                 }
-                GenMysqlBak();
-                GenIISBak();
-                GenFinalRar();
-                UploadBaidu();
                 DeleteBeforeFiles();
+                Thread t = new Thread(doBak);
+                t.Start();
                 Log("备份成功", BakPath);
             }
             catch (Exception ex)
@@ -68,6 +66,19 @@ namespace BaiduYunBakTool
                 Log("备份失败", ex.Message + ex.StackTrace);
             }
 
+        }
+        private void doBak()
+        {
+            GenMysqlBak();
+            GenIISBak();
+            GenFinalRar();
+            this.BeginInvoke(new Action(() => {
+                this.Show();
+                this.Focus();
+                UploadBaidu();
+                this.Hide();
+            }));
+            
         }
         private void DeleteBeforeFiles()
         {
@@ -298,7 +309,8 @@ namespace BaiduYunBakTool
             info.WorkingDirectory = MysqlPath;
             Process p = Process.Start(info);
             Log("mysql", p.StandardOutput.ReadToEnd());
-            p.WaitForExit(1000 * 60 * 10);
+            p.WaitForExit();
+            Thread.Sleep(1000);
 
         }
         private void GenIISBak()
@@ -308,7 +320,7 @@ namespace BaiduYunBakTool
             info.WindowStyle = ProcessWindowStyle.Hidden;
             info.Arguments = " a -pSfx371482 " + Path.Combine(BakPath, DateTime.Now.ToString("yyyyMMddHHmm") + ".rar") + " " + IISPath;
             Process p = Process.Start(info);
-            p.WaitForExit(1000 * 60 * 10);
+            p.WaitForExit();
         }
         private void GenFinalRar()
         {
@@ -318,11 +330,11 @@ namespace BaiduYunBakTool
             info.WindowStyle = ProcessWindowStyle.Hidden;
             info.Arguments = " a -pSfx371482 " + bakfile + " " + BakPath;
             Process p = Process.Start(info);
-            p.WaitForExit(1000 * 60 * 10);
+            p.WaitForExit();
         }
         private void UploadBaidu()
         {
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
             string bakfile = Path.Combine(ConfigurationManager.AppSettings["BakPath"].ToString(), DateTime.Now.ToString("yyyyMMdd") + ".rar");
             var r = this.wb.Document.InvokeScript("lzqUpload", new object[] { bakfile});
         }
