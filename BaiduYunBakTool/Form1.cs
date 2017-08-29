@@ -37,7 +37,7 @@ namespace BaiduYunBakTool
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (DateTime.Now.ToString("HH:mm") == ConfigurationManager.AppSettings["StartTime"].ToString())
+            if (DateTime.Now.ToString("HH:mm:ss") == ConfigurationManager.AppSettings["StartTime"].ToString() + ":00")
             {
                 Bak();
             }
