@@ -441,8 +441,11 @@ namespace BaiduYunBakTool
         {
             var openFile = win32.FindWindow(null, "选择要加载的文件");
             win32.SetForegroundWindow(openFile);
-            SendKeys.SendWait(filename);
             IntPtr hNext = IntPtr.Zero;
+            var ComboBoxEx32 = win32.FindWindowEx(openFile, hNext, "ComboBoxEx32", null);
+            var ComboBox = win32.FindWindowEx(ComboBoxEx32, hNext, "ComboBox", null);
+            var edit = win32.FindWindowEx(ComboBox, hNext, "Edit", null);
+            win32.SendMessage(edit,win32.WM_SETTEXT, IntPtr.Zero, filename);
             //第一个对话框
             var openButton = win32.FindWindowEx(openFile, hNext, "Button", "打开(&O)");
             win32.SendMessage(openButton, BM_CLICK, IntPtr.Zero, null);
@@ -562,7 +565,9 @@ namespace BaiduYunBakTool
 
         private void button2_Click(object sender, EventArgs e)
         {
-            UploadBaidu();
+
+            var bakfile = "e:\\PacsAPI.zip";
+            var r = this.wb.Document.InvokeScript("lzqUpload", new object[] { bakfile });
         }
 
         private void wb_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
