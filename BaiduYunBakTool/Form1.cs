@@ -74,9 +74,8 @@ namespace BaiduYunBakTool
             GenFinalRar();
             this.BeginInvoke(new Action(() => {
                 this.Show();
-                this.Focus();
+                Thread.Sleep(100);
                 UploadBaidu();
-                this.Hide();
             }));
             
         }
@@ -439,6 +438,7 @@ namespace BaiduYunBakTool
         }
         public void UploadBaidu(string filename)
         {
+            Log("uploadbaidu", filename);
             var openFile = win32.FindWindow(null, "选择要加载的文件");
             win32.SetForegroundWindow(openFile);
             IntPtr hNext = IntPtr.Zero;
@@ -446,9 +446,12 @@ namespace BaiduYunBakTool
             var ComboBox = win32.FindWindowEx(ComboBoxEx32, hNext, "ComboBox", null);
             var edit = win32.FindWindowEx(ComboBox, hNext, "Edit", null);
             win32.SendMessage(edit,win32.WM_SETTEXT, IntPtr.Zero, filename);
+            Thread.Sleep(100);
             //第一个对话框
             var openButton = win32.FindWindowEx(openFile, hNext, "Button", "打开(&O)");
             win32.SendMessage(openButton, BM_CLICK, IntPtr.Zero, null);
+            Thread.Sleep(100);
+            this.Hide();
 
         }
         private void SetAutoRun()
@@ -566,15 +569,16 @@ namespace BaiduYunBakTool
         private void button2_Click(object sender, EventArgs e)
         {
 
-            var bakfile = "e:\\PacsAPI.zip";
+            var bakfile = "e:\\test.rar";
             var r = this.wb.Document.InvokeScript("lzqUpload", new object[] { bakfile });
         }
 
         private void wb_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             System.Diagnostics.Trace.WriteLine("DocumentCompleted：" + e.Url);
+            Log("loadurl", e.Url.ToString());
             //文件列表
-            if (e.Url.ToString().IndexOf("https://pan.baidu.com/disk/home#list/path=/&vmode=list") > -1)
+            if (e.Url.ToString().IndexOf("https://pan.baidu.com/disk/home") > -1)
             {
                 InstallJs(this.wb.Document);
             }

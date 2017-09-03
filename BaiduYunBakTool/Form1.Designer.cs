@@ -93,7 +93,6 @@
             this.wb.Location = new System.Drawing.Point(12, 91);
             this.wb.MinimumSize = new System.Drawing.Size(20, 20);
             this.wb.Name = "wb";
-            this.wb.ScriptErrorsSuppressed = true;
             this.wb.Size = new System.Drawing.Size(1199, 399);
             this.wb.TabIndex = 1;
             this.wb.Url = new System.Uri("https://pan.baidu.com", System.UriKind.Absolute);
@@ -105,9 +104,8 @@
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 2;
-            this.button2.Text = "button2";
+            this.button2.Text = "test";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Visible = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // Form1
