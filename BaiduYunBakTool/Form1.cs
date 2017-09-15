@@ -46,6 +46,7 @@ namespace BaiduYunBakTool
         {
             try
             {
+                this.wb.Refresh(WebBrowserRefreshOption.Completely);
                 BakPath = ConfigurationManager.AppSettings["BakPath"].ToString();
                 if (!Directory.Exists(BakPath))
                 {
@@ -104,11 +105,25 @@ namespace BaiduYunBakTool
                 }
                 foreach (var f in deleteFiles)
                 {
-                    f.Delete();
+                    try
+                    {
+                        f.Delete();
+                    }
+                    catch
+                    {
+                        Log("删除旧文件失败", f.FullName);
+                    }
                 }
                 foreach (var f in deleteDirs)
                 {
-                    f.Delete();
+                    try
+                    {
+                        f.Delete();
+                    }
+                    catch
+                    {
+                        Log("删除旧文件失败", f.FullName);
+                    }
                 }
             }
             catch (Exception ex)

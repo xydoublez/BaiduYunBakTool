@@ -93,6 +93,7 @@
             this.wb.Location = new System.Drawing.Point(12, 91);
             this.wb.MinimumSize = new System.Drawing.Size(20, 20);
             this.wb.Name = "wb";
+            this.wb.ScriptErrorsSuppressed = true;
             this.wb.Size = new System.Drawing.Size(1199, 399);
             this.wb.TabIndex = 1;
             this.wb.Url = new System.Uri("https://pan.baidu.com", System.UriKind.Absolute);
