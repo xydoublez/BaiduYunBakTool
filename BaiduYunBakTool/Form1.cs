@@ -47,6 +47,7 @@ namespace BaiduYunBakTool
             try
             {
                 this.wb.Refresh(WebBrowserRefreshOption.Completely);
+                Thread.Sleep(1000);
                 BakPath = ConfigurationManager.AppSettings["BakPath"].ToString();
                 if (!Directory.Exists(BakPath))
                 {
