@@ -41,6 +41,11 @@ namespace BaiduYunBakTool
             {
                 Bak();
             }
+            if (DateTime.Now.ToString("HH:mm:ss") == "22:00:00")
+            {
+                Application.Restart();
+                Environment.Exit(0);
+            }
         }
         private void Bak()
         {
